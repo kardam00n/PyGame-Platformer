@@ -6,7 +6,7 @@ class Player():
     def __init__(self, x, y):
         self.v_y = 0
         self.v_x = 0
-        img = pygame.image.load('assets/Super-Platformer-Royalty-Free-Game-Art-Set.png')
+        img = pygame.image.load('assets/player-right.png')
         self.image = pygame.transform.scale(img, (50,50))
         self.rect = self.image.get_rect()
         self.rect.x=x
@@ -26,8 +26,10 @@ class Player():
             self.jump=False
         if key[pygame.K_LEFT]:
             dx-=10
+            self.image = pygame.transform.scale(pygame.image.load('assets/player-left.png'), (50,50))
         if key[pygame.K_RIGHT]:
             dx+=10
+            self.image = pygame.transform.scale(pygame.image.load('assets/player-right.png'), (50,50))
 
         # grawitacja
         if self.v_y<=20:
