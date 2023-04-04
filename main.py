@@ -19,7 +19,7 @@ szerokosc = 50
 wysokosc = 50
 krok = 20
 run = True
-player = Player.Player(0,50)
+player = Player.Player(0,400)
 camera = Camera.Camera(player)
 rect1 = pygame.Rect(0,500,800,100)
 
@@ -27,8 +27,8 @@ rect1 = pygame.Rect(0,500,800,100)
 monets = [Find.Find(40, 450), Find.Find(150, 450), Find.Find(260, 450), Find.Find(300, 400)]
 
 # lista zawierajaca bloki
-blocks = [Box.Box(0+50*i, 500) for i in range(25)]
-for i in range(25):
+blocks = [Box.Box(0+50*i, 500) for i in range(48)]
+for i in range(48):
     blocks.append(Box.Box(0+50*i, 550))
 blocks.append(Box.Box(300, 450))
 blocks.append(Box.Box(250, 350))
