@@ -11,7 +11,6 @@ pygame.init()
 Tiles = []
 win = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Pierwsza gra")
-#make and display background in pygame from file
 
 x = 0
 y = 40
@@ -32,7 +31,10 @@ for i in range(48):
     blocks.append(Box.Box(0+50*i, 550))
 blocks.append(Box.Box(300, 450))
 blocks.append(Box.Box(250, 350))
+
+#glowna petal
 while run:
+    #odswiezanie background
     background = pygame.image.load("assets/Background.png")
     background = pygame.transform.scale(background, (800, 600))
     win.blit(background, (0, 0))
@@ -46,6 +48,7 @@ while run:
     # dodawanie obiektow do mapy
     a = player.update(blocks)
    
+    #rysowanie obiektow na mapie
     for moneta in monets:
         win.blit(moneta.image, (moneta.rect.x - camera.offset.x, moneta.rect.y - camera.offset.y))
     for block in blocks:
@@ -63,9 +66,11 @@ while run:
     pointsRect = points.get_rect()
     pointsRect.x=0
     pointsRect.y=0
+    win.blit(points, pointsRect)
+    
+    #wyswietlanie gracza i poruszanie kamery
     camera.scroll()
     win.blit(player.image, (player.rect.x-camera.offset.x, player.rect.y-camera.offset.y))
-    win.blit(points, pointsRect)
 
     # odświeżenie ekranu
     pygame.display.update()

@@ -1,5 +1,4 @@
 import pygame.key
-
 import Box
 import Find
 class Player():
@@ -52,5 +51,7 @@ class Player():
                     self.v_y=0
         self.rect.x += dx
         self.rect.y += dy
+        self.rect.x = min(self.rect.x, 2400-self.rect.w)
+        self.rect.x = max(self.rect.x, 0)
     def get_Find(self, find: Find.Find):
         self.points+=find.points
