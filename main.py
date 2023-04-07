@@ -4,6 +4,7 @@ import Player
 import Find
 import Box
 import Camera
+import enemy
 pygame.init()
 
 
@@ -20,6 +21,7 @@ wysokosc = 50
 krok = 20
 run = True
 player = Player.Player(0,400)
+enemies = [enemy.Enemy(340, 200)]
 camera = Camera.Camera(player)
 rect1 = pygame.Rect(0,500,800,100)
 
@@ -32,25 +34,31 @@ for i in range(48):
     blocks.append(Box.Box(0+50*i, 550))
 blocks.append(Box.Box(300, 450))
 blocks.append(Box.Box(250, 350))
+blocks.append(Box.Box(500, 450))
 while run:
     background = pygame.image.load("assets/Background.png")
     background = pygame.transform.scale(background, (800, 600))
     win.blit(background, (0, 0))
     # zamkniecie gry
+    if player.health<=0:
+        run=False
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
     # opóźnienie w grze
-    pygame.time.delay(50)
+    pygame.time.delay(20)
 
     # dodawanie obiektow do mapy
-    a = player.update(blocks)
-   
+    player.update(blocks, enemies)
+    for en in enemies:
+        en.update(blocks)
     for moneta in monets:
         win.blit(moneta.image, (moneta.rect.x - camera.offset.x, moneta.rect.y - camera.offset.y))
     for block in blocks:
         win.blit(block.image, (block.rect.x - camera.offset.x, block.rect.y - camera.offset.y))
-
+    # dodawanie przeciwnikow
+    for en in enemies:
+        win.blit(en.image, (en.rect.x - camera.offset.x, en.rect.y - camera.offset.y))
     # zbieranie monet
     for moneta in monets:
         if player.rect.colliderect(moneta.rect):
@@ -64,8 +72,16 @@ while run:
     pointsRect.x=0
     pointsRect.y=0
     camera.scroll()
-    win.blit(player.image, (player.rect.x-camera.offset.x, player.rect.y-camera.offset.y))
     win.blit(points, pointsRect)
 
+    # wyswietlacz zdrowia
+    font = pygame.font.Font('freesansbold.ttf', 36)
+    health = font.render(str(player.health), True, (0, 0, 0), None)
+    healthRect = health.get_rect()
+    healthRect.x = 100
+    healthRect.y = 0
+    camera.scroll()
+    win.blit(health, healthRect)
+    win.blit(player.image, (player.rect.x-camera.offset.x, player.rect.y-camera.offset.y))
     # odświeżenie ekranu
     pygame.display.update()
