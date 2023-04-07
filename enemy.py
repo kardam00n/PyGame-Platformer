@@ -1,3 +1,5 @@
+import random
+
 import pygame
 class Enemy():
     def __init__(self, x, y):
@@ -24,6 +26,8 @@ class Enemy():
     def update(self, blocks):
         dx=self.speed
         dy=0
+        if self.v_y==0 and random.random()<0.05:
+            self.v_y=-20
         # grawitacja
         if self.v_y <= 20:
             self.v_y += 2
