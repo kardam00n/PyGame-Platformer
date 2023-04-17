@@ -1,7 +1,8 @@
 import pygame.key
+import time
 # import spritesheet
-import Box
-import Find
+import Display.Box as Box
+import Display.Coin as Coin
 class Player():
     def __init__(self, x, y):
         self.v_y = 0
@@ -34,8 +35,10 @@ class Player():
         self.mlee_time = 0
         self.mlee_attack = False
         self.left_side=False
-        self.health=200
-
+        self.attack = 10
+        self.maxHealth = 200
+        self.health=self.maxHealth
+        self.iFrameTime = 0
     def getimg(self, col, row, width, height):
         image = pygame.Surface((width, height))
         image.blit(self.img, (0, 0), ((col * width), (row*height), width, height))
@@ -44,7 +47,10 @@ class Player():
         image = pygame.transform.scale(image, (50, 50))
         return image
 
-    def update(self, blocks, enemies):
+    def update(self, map):
+
+        blocks = map.blocks
+        enemies = map.enemies
         # movement
         dx=0
         dy=0
@@ -117,20 +123,27 @@ class Player():
                 self.mlee_time=-1
                 self.mlee_attack=False
         # interakcja z wrogami
+        dt = time.time()*1000 - self.iFrameTime
         for en in enemies:
             if en.rect.colliderect(self.rect.x + dx, self.rect.y+dy, self.rect.width, self.rect.height):
                 if self.mlee_attack:
                     if (self.left_side and self.rect.x>en.rect.x) or (not self.left_side and self.rect.x<en.rect.x):
-                        enemies.remove(en)
+                        en.takeDmg(self.attack)
+                        if en.health <= 0:
+                            enemies.remove(en)
                         self.points+=10
                         continue
-                else:
+                elif dt > 1000 or self.iFrameTime == 0:
                     dy-=10
-                    self.health-=10
+                    self.iFrameTime = time.time() * 1000
+                    self.health-=en.attack 
 
 
         # odswierzanie pozycji
         self.rect.x += dx
         self.rect.y += dy
-    def get_Find(self, find: Find.Find):
-        self.points+=find.points
+        self.rect.x = max(map.LEFT_BORDER, self.rect.x)
+        self.rect.x = min(self.rect.x, map.RIGHT_BORDER - self.rect.width)
+    
+    def get_Coin(self, coin: Coin.Coin):
+        self.points+=coin.points

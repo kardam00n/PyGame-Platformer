@@ -1,5 +1,5 @@
 import pygame
-class Find:
+class Coin:
     def __init__(self, x, y):
         self.points = 5
         img = pygame.image.load('assets/png-clipart-platinum-design-bitcoin-bitcoin-platinum-coins-thumbnail.png')

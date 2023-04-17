@@ -1,6 +1,8 @@
 import random
-
+import time
 import pygame
+import Entities.HealthBar as HealthBar
+
 class Enemy():
     def __init__(self, x, y):
         self.img = pygame.image.load('assets/NightBorne.png').convert_alpha()
@@ -16,14 +18,27 @@ class Enemy():
         self.step = 0
         self.v_y = 0
         self.speed = 4
+        self.attack = 10
+        self.health = 25
+        self.HealhBar = HealthBar.HealthBar(self.health, self.health)
+        self.iFrameTime = 0
     def getimg(self, col, row, width, height):
         image = pygame.Surface((width, height))
         image.blit(self.img, (0, 0), ((col * width), (row*height), width, height))
         image.set_colorkey((0,0,0))
 
-        image = pygame.transform.scale(image, (50, 50))
+        image = pygame.transform.scale(image, (80, 80))
         return image
-    def update(self, blocks):
+    
+    def takeDmg(self, dmg):
+        dt = time.time()*1000 - self.iFrameTime
+        if dt > 500 or self.iFrameTime == 0:
+            self.iFrameTime = time.time() * 1000
+            self.health -= dmg
+        
+    
+    def update(self, map):
+        blocks = map.blocks
         dx=self.speed
         dy=0
         if self.v_y==0 and random.random()<0.05:
@@ -62,3 +77,10 @@ class Enemy():
         if self.left:
             self.image = pygame.transform.flip(self.step_ani[self.step], True, False)
         else: self.image = self.step_ani[self.step]
+
+        self.rect.x = max(map.LEFT_BORDER, self.rect.x)
+        self.rect.x = min(self.rect.x, map.RIGHT_BORDER - self.rect.width)
+       
+    def renderEnemy(self, win, camera):
+        win.blit(self.image, (self.rect.x - camera.offset.x, self.rect.y - camera.offset.y))
+        self.HealhBar.render(win,camera, self.rect.x, self.rect.y, self.health)
