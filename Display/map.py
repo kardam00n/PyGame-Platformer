@@ -8,13 +8,16 @@ import Entities.enemy as enemy
 class Map:
     def __init__(self, win):
         
-        self.player = Player.Player(0,400)
+        self.player = Player.Player(50,400)
         self.enemies = [enemy.Enemy(340, 200)]
         self.coins = [Coin.Coin(40, 450), Coin.Coin(150, 450), Coin.Coin(260, 450), Coin.Coin(300, 400)]
         self.blocks = [Box.Box(0+50*i, y) for i in range(48) for y in (500,550)]
         self.blocks.append(Box.Box(300, 450))
         self.blocks.append(Box.Box(250, 350))
         self.blocks.append(Box.Box(500, 450))
+        for i in range(-100,500, 50):
+            self.blocks.append(Box.Box(-50, i))
+            self.blocks.append(Box.Box(2400, i))
 
         self.camera = Camera.Camera(self.player)
         self.win = win

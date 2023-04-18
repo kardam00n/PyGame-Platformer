@@ -39,7 +39,17 @@ class Enemy():
     
     def update(self, map):
         blocks = map.blocks
+        distance_to_player=map.player.rect.x-self.rect.x
+        if (abs(distance_to_player)<150):
+            if (distance_to_player<0):
+                self.left=True
+            else:
+                self.left=False
+        else:
+            if (random.random()<0.005):
+                self.left = not self.left
         dx=self.speed
+
         dy=0
         if self.v_y==0 and random.random()<0.05:
             self.v_y=-20
@@ -60,14 +70,14 @@ class Enemy():
                     dy = block.rect.top - self.rect.bottom
                     # self.in_air=False
                     self.v_y=0
-        if dx==0:
+        if dx==0 and not abs(distance_to_player)<150:
             dx=-self.speed
             if self.left:
                 dx=self.speed
         for block in blocks:
             if block.rect.colliderect(self.rect.x + dx, self.rect.y, self.rect.width, self.rect.height):
                 dx = 0
-        if dx>=0:
+        if dx>0:
             self.left=False
         else: self.left = True
         self.rect.x+=dx

@@ -142,8 +142,8 @@ class Player():
         # odswierzanie pozycji
         self.rect.x += dx
         self.rect.y += dy
-        self.rect.x = max(map.LEFT_BORDER, self.rect.x)
-        self.rect.x = min(self.rect.x, map.RIGHT_BORDER - self.rect.width)
+        # self.rect.x = max(map.LEFT_BORDER, self.rect.x)
+        # self.rect.x = min(self.rect.x, map.RIGHT_BORDER - self.rect.width)
     
     def get_Coin(self, coin: Coin.Coin):
         self.points+=coin.points
