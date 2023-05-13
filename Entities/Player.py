@@ -39,6 +39,7 @@ class Player():
         self.maxHealth = 200
         self.health=self.maxHealth
         self.iFrameTime = 0
+        self.pop_x = 0
     def getimg(self, col, row, width, height):
         image = pygame.Surface((width, height))
         image.blit(self.img, (0, 0), ((col * width), (row*height), width, height))
@@ -93,17 +94,28 @@ class Player():
 
         # interakcja z blokami
         self.in_air=True
+        touch_x = False
+        touch_y = False
         for block in blocks:
             if block.rect.colliderect(self.rect.x + dx, self.rect.y, self.rect.width, self.rect.height):
                 dx=0
+                touch_x = True
             if block.rect.colliderect(self.rect.x, self.rect.y + dy, self.rect.width, self.rect.height):
                 if self.v_y<0:
                     dy = block.rect.bottom - self.rect.top
                     self.v_y=0
                 else:
                     dy = block.rect.top - self.rect.bottom
+                    if not touch_x:
+                        dx = block.slow(dx, self.pop_x)
+                    self.health-=block.hit()
+                    self.v_y = 0
+                    if not touch_y:
+                        if (self.jump):
+                            self.v_y-=2*block.bounce()
+                        else:
+                            self.v_y-=block.bounce()
                     self.in_air=False
-                    self.v_y=0
         if self.in_air:
             if self.air_time < 4:
                 self.air_time+=1
@@ -138,7 +150,7 @@ class Player():
                     self.iFrameTime = time.time() * 1000
                     self.health-=en.attack 
 
-
+        self.pop_x = dx
         # odswierzanie pozycji
         self.rect.x += dx
         self.rect.y += dy
