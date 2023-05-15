@@ -2,13 +2,13 @@ import pygame
 vec = pygame.math.Vector2
 
 class Camera():
-    def __init__(self,player):
+    def __init__(self,player, map):
         self.player = player
         self.offset = vec(0,0)
-        self.DISPLAY_W = 800
-        self.DISPLAY_H = 600
-        self.LEFT_BORDER = 0
-        self.RIGHT_BORDER = 2400
+        self.LEFT_BORDER = map.LEFT_BORDER
+        self.RIGHT_BORDER = map.RIGHT_BORDER
+        self.DISPLAY_W = map.DISPLAY_W
+        self.DISPLAY_H = map.DISPLAY_H
         self.CENTER = vec(-self.DISPLAY_W/2, -self.DISPLAY_H/2)
         self.BOTTOM_BORDER = self.DISPLAY_H
     def scroll(self):

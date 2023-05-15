@@ -33,5 +33,15 @@ def displayGameOver(win, map):
     gameOverRect.x = map.DISPLAY_W/2
     gameOverRect.y = map.DISPLAY_H/2
     win.fill((0,0,0))
-    win.blit(gameOverStr, gameOverRect)
+    win.blit(gameOverStr, (gameOverRect.x-gameOverRect.width/2, gameOverRect.y-gameOverRect.height/2))
+    pygame.display.update()
+
+def displayWin(win, map):
+    font = pygame.font.Font('freesansbold.ttf', 24)
+    gameOverStr = font.render("LEVEL COMPLETED", True, (0, 255, 0), None)
+    gameOverRect = gameOverStr.get_rect()
+    gameOverRect.x = map.DISPLAY_W/2
+    gameOverRect.y = map.DISPLAY_H/2
+    win.fill((0,0,0))
+    win.blit(gameOverStr, (gameOverRect.x-gameOverRect.width/2, gameOverRect.y-gameOverRect.height/2))
     pygame.display.update()

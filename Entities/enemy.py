@@ -1,7 +1,8 @@
 import random
 import time
 import pygame
-import Entities.HealthBar as HealthBar
+
+from Entities import HealthBar
 
 class Enemy():
     def __init__(self, x, y):

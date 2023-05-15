@@ -1,34 +1,29 @@
 import pygame
-import Entities.Player as Player
-import Display.Box as Box
-import Display.Coin as Coin
-import Display.Camera as Camera
-import Entities.enemy as enemy
+
+from Entities import Player, enemy
+from Display import Block, Camera, Coin
+from Levels import MapParser
 
 class Map:
     def __init__(self, win):
-        
-        self.player = Player.Player(50,400)
-        self.enemies = [enemy.Enemy(340, 200)]
-        self.coins = [Coin.Coin(40, 450), Coin.Coin(150, 450), Coin.Coin(260, 450), Coin.Coin(300, 400)]
-        self.blocks = [Box.Grass(0+50*i, y) for i in range(48) for y in (500,550)]
-        self.blocks.append(Box.Ballons(200, 450))
-        self.blocks.append(Box.Ballons(150, 450))
-        self.blocks.append(Box.Grass(200, 350))
-        self.blocks.append(Box.Grass(300, 450))
-        self.blocks.append(Box.Grass(250, 350))
-        self.blocks.append(Box.Grass(500, 450))
-        for i in range(-100,500, 50):
-            self.blocks.append(Box.Grass(-50, i))
-            self.blocks.append(Box.Grass(2400, i))
-
-        self.camera = Camera.Camera(self.player)
         self.win = win
 
-        self.LEFT_BORDER = self.camera.LEFT_BORDER
-        self.RIGHT_BORDER = self.camera.RIGHT_BORDER
-        self.DISPLAY_W = self.camera.DISPLAY_W
-        self.DISPLAY_H = self.camera.DISPLAY_H
+        self.DISPLAY_W = 800
+        self.DISPLAY_H = 600
+        self.LEFT_BORDER = 0
+        self.RIGHT_BORDER = 2400
+
+
+        
+
+        self.player = Player.Player(0,0)
+        self.finish = Block.Finish(self.DISPLAY_W, 0)
+        self.blocks = []
+        self.coins = []
+        self.enemies = []
+        MapParser.parseLvl("Levels/lvl1.txt", self)
+        self.camera = Camera.Camera(self.player, self)
+
 
     def render(self):
         for coin in self.coins:
@@ -39,7 +34,7 @@ class Map:
             en.renderEnemy(self.win, self.camera)
         
         self.win.blit(self.player.image, (self.player.rect.x-self.camera.offset.x, self.player.rect.y-self.camera.offset.y))
-
+        self.win.blit(self.finish.image, (self.finish.rect.x-self.camera.offset.x, self.finish.rect.y-self.camera.offset.y))
         self.player.update(self)
     
         for en in self.enemies:

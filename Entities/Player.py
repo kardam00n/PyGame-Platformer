@@ -1,12 +1,13 @@
 import pygame.key
 import time
-# import spritesheet
-import Display.Box as Box
-import Display.Coin as Coin
+
+from Display import Block, Coin
+
 class Player():
     def __init__(self, x, y):
         self.v_y = 0
         self.v_x = 0
+        self.completed = False
         self.img = pygame.image.load('assets/Adventurer Sprite Sheet v1.5.png').convert_alpha()
         # wczytywanie animacji
         self.step_ani = []
@@ -52,11 +53,12 @@ class Player():
 
         blocks = map.blocks
         enemies = map.enemies
+        finish = map.finish
         # movement
         dx=0
         dy=0
         key=pygame.key.get_pressed()
-        # animacja stania
+        # idle animation
         self.stand += 1
         if self.stand > 12:
             self.stand = 0
@@ -96,10 +98,16 @@ class Player():
         self.in_air=True
         touch_x = False
         touch_y = False
+        #dotarcie do mety
+        if finish.rect.colliderect(self.rect.x + dx, self.rect.y, self.rect.width, self.rect.height):
+            self.completed = True
         for block in blocks:
             if block.rect.colliderect(self.rect.x + dx, self.rect.y, self.rect.width, self.rect.height):
                 dx=0
                 touch_x = True
+            if block.rect.colliderect(self.rect.x + dx - 15*(self.left_side), self.rect.y, self.rect.width+15*(not self.left_side), self.rect.height):
+                    if(self.mlee_attack and block.breakBlock()):
+                        map.blocks.remove(block)
             if block.rect.colliderect(self.rect.x, self.rect.y + dy, self.rect.width, self.rect.height):
                 if self.v_y<0:
                     dy = block.rect.bottom - self.rect.top
@@ -141,6 +149,7 @@ class Player():
                 if self.mlee_attack:
                     if (self.left_side and self.rect.x>en.rect.x) or (not self.left_side and self.rect.x<en.rect.x):
                         en.takeDmg(self.attack)
+                        # en.rect.x += 10 * (-1 if self.left_side else 1)
                         if en.health <= 0:
                             enemies.remove(en)
                         self.points+=10
@@ -148,7 +157,11 @@ class Player():
                 elif dt > 1000 or self.iFrameTime == 0:
                     dy-=10
                     self.iFrameTime = time.time() * 1000
-                    self.health-=en.attack 
+                    self.health-=en.attack
+                    # self.rect.x += 10 * (-1 if en.left else 1) 
+
+        if self. rect.y > map.DISPLAY_H:
+            self.health -= 10
 
         self.pop_x = dx
         # odswierzanie pozycji
