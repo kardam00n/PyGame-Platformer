@@ -21,7 +21,7 @@ def parseLvl(file, map):
                 case 2:
                     map.coins.append(Coin.Coin(x, y))
                 case 3:
-                    map.enemies.append(enemy.Enemy(x, y))
+                    map.enemies.append(enemy.EnemyMlee(x, y))
                 case 4:
                     map.blocks.append(Block.Ice(x, y))
                 case 5:
@@ -34,5 +34,7 @@ def parseLvl(file, map):
                     map.blocks.append(Block.Crate(x, y))
                 case 9:
                     map.finish = Block.Finish(x, y)
+                case 10:
+                    map.enemies.append(enemy.EnemyArcher(x,y))
             
             

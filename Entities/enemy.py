@@ -4,13 +4,11 @@ import pygame
 
 from Entities import HealthBar
 from Display import Arrows
+
 class Enemy():
-    def __init__(self, x, y):
-        self.img = pygame.image.load('assets/NightBorne.png').convert_alpha()
+    def __init__(self, x, y, attack, health,step_ani):
         # wczytywanie animacji
-        self.step_ani = []
-        for i in range(6):
-            self.step_ani.append(self.getimg(i, 0, 80, 80))
+        self.step_ani = step_ani
         self.image = self.step_ani[0]
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -19,24 +17,10 @@ class Enemy():
         self.step = 0
         self.v_y = 0
         self.speed = 4
-        self.attack = 10
-        self.health = 25
+        self.attack = attack
+        self.health = health
         self.HealhBar = HealthBar.HealthBar(self.health, self.health)
         self.iFrameTime = 0
-    def getimg(self, col, row, width, height):
-        image = pygame.Surface((width, height))
-        image.blit(self.img, (0, 0), ((col * width), (row*height), width, height))
-        image.set_colorkey((0,0,0))
-
-        image = pygame.transform.scale(image, (80, 80))
-        return image
-    
-    def takeDmg(self, dmg):
-        dt = time.time()*1000 - self.iFrameTime
-        if dt > 500 or self.iFrameTime == 0:
-            self.iFrameTime = time.time() * 1000
-            self.health -= dmg
-    
     def update(self, map):
         blocks = map.blocks
         distance_to_player=map.player.rect.x-self.rect.x
@@ -87,13 +71,43 @@ class Enemy():
         if self.left:
             self.image = pygame.transform.flip(self.step_ani[self.step], True, False)
         else: self.image = self.step_ani[self.step]
-        # strzelanie
-        # if random.random()<0.05:
-        #
-
+        self.step+=1
         self.rect.x = max(map.LEFT_BORDER, self.rect.x)
         self.rect.x = min(self.rect.x, map.RIGHT_BORDER - self.rect.width)
-       
     def renderEnemy(self, win, camera):
         win.blit(self.image, (self.rect.x - camera.offset.x, self.rect.y - camera.offset.y))
         self.HealhBar.render(win,camera, self.rect.x, self.rect.y, self.health)
+    def takeDmg(self, dmg):
+        dt = time.time() * 1000 - self.iFrameTime
+        if dt > 500 or self.iFrameTime == 0:
+            self.iFrameTime = time.time() * 1000
+            self.health -= dmg
+class EnemyMlee(Enemy):
+    def __init__(self, x, y):
+        img = pygame.image.load('assets/NightBorne.png').convert_alpha()
+        step_ani = []
+        for i in range(6):
+            step_ani.append(self.getimg(i, 0, 80, 80, img))
+        super().__init__(x,y, 10, 200, step_ani)
+    def getimg(self, col, row, width, height, img):
+        image = pygame.Surface((width, height))
+        image.blit(img, (0, 0), ((col * width), (row*height), width, height))
+        image.set_colorkey((0,0,0))
+
+        image = pygame.transform.scale(image, (80, 80))
+        return image
+class EnemyArcher(Enemy):
+    def __init__(self, x, y):
+        step_ani = []
+        for i in range(1, 7):
+            path = 'assets/Archer/run/Archer_run' + str(i) + '.png'
+            img = pygame.image.load(path).convert_alpha()
+            image = pygame.transform.scale(img, (80, 80))
+            step_ani.append(image)
+        super().__init__(x,y,10, 100, step_ani)
+
+    def update(self, map):
+        if random.random()<0.05 and abs(map.player.rect.x - self.rect.x)<300:
+            Arrows.Classic(self.rect.x, self.rect.y, False, (map.player.rect.x - self.rect.x, map.player.rect.y - self.rect.y), 5, map)
+        super().update(map)
+       
