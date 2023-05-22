@@ -1,7 +1,7 @@
 import pygame.key
 import time
 
-from Display import Block, Coin
+from Display import Block, Coin, Arrows
 
 class Player():
     def __init__(self, x, y):
@@ -23,6 +23,10 @@ class Player():
         self.mlee_ani = []
         for i in range(8):
             self.mlee_ani.append(self.getimg(i, 2, 32, 32))
+        self.arrow_ani=[]
+        for i in range(3):
+            self.arrow_ani.append(self.getimg(i, 9, 32, 32))
+        self.arrow_ani.append(self.getimg(6,9,32,32))
         #
         self.rect = self.image.get_rect()
         self.rect.x=x
@@ -41,6 +45,10 @@ class Player():
         self.health=self.maxHealth
         self.iFrameTime = 0
         self.pop_x = 0
+        self.arrow_attack=False
+        self.arrow_attack_time_z=0
+        self.arrow_attack_time_x=0
+        self.arrow_attack_time_c=0
     def getimg(self, col, row, width, height):
         image = pygame.Surface((width, height))
         image.blit(self.img, (0, 0), ((col * width), (row*height), width, height))
@@ -50,7 +58,6 @@ class Player():
         return image
 
     def update(self, map):
-
         blocks = map.blocks
         enemies = map.enemies
         finish = map.finish
@@ -70,29 +77,28 @@ class Player():
             self.v_y=-25
         if not key[pygame.K_SPACE]:
             self.jump=False
-        if key[pygame.K_LEFT]:
+        if key[pygame.K_a]:
             dx-=10
             self.step+=1
             if self.step>7:
                 self.step=0
             self.image = pygame.transform.flip(self.step_ani[self.step], True, False)
             self.left_side = True
-        if key[pygame.K_RIGHT]:
+        if key[pygame.K_d]:
             dx+=10
             self.step += 1
             if self.step > 7:
                 self.step = 0
             self.image = self.step_ani[self.step]
             self.left_side=False
-        if key[pygame.K_a]:
+        if key[pygame.K_q]:
             self.mlee_attack = True
             self.mlee_time=0
-
+        # if key[]
         # grawitacja
         if self.v_y<=20:
             self.v_y+=2
         dy+=self.v_y
-
 
         # interakcja z blokami
         self.in_air=True
@@ -162,6 +168,45 @@ class Player():
 
         if self. rect.y > map.DISPLAY_H:
             self.health -= 10
+
+        # strzały klasyczna
+        if key[pygame.K_z] and self.arrow_attack_time_z<8:
+            if self.left_side:
+                self.image = pygame.transform.flip(self.arrow_ani[self.arrow_attack_time_z // 2], True, False)
+            else: self.image = self.arrow_ani[self.arrow_attack_time_z // 2]
+            self.arrow_attack_time_z+=1
+
+        if (not key[pygame.K_z] and self.arrow_attack_time_z > 0) or self.arrow_attack==8:
+            x = pygame.mouse.get_pos()[0] - self.rect.x
+            y = pygame.mouse.get_pos()[1] - self.rect.y
+            Arrows.Classic(self.rect.x, self.rect.y, True, (x, y), self.arrow_attack_time_z, map)
+            self.arrow_attack_time_z = 0
+
+        # penetrating arrow
+        if key[pygame.K_x] and self.arrow_attack_time_x<8:
+            if self.left_side:
+                self.image = pygame.transform.flip(self.arrow_ani[self.arrow_attack_time_x // 2], True, False)
+            else: self.image = self.arrow_ani[self.arrow_attack_time_x // 2]
+            self.arrow_attack_time_x+=1
+
+        if (not key[pygame.K_x] and self.arrow_attack_time_x > 0) or self.arrow_attack==8:
+            x = pygame.mouse.get_pos()[0] - self.rect.x
+            y = pygame.mouse.get_pos()[1] - self.rect.y
+            Arrows.Penetrating(self.rect.x, self.rect.y, True, (x, y), self.arrow_attack_time_x, map)
+            self.arrow_attack_time_x = 0
+
+        # caboom arrow
+        if key[pygame.K_c] and self.arrow_attack_time_c<8:
+            if self.left_side:
+                self.image = pygame.transform.flip(self.arrow_ani[self.arrow_attack_time_c // 2], True, False)
+            else: self.image = self.arrow_ani[self.arrow_attack_time_c // 2]
+            self.arrow_attack_time_c+=1
+
+        if (not key[pygame.K_c] and self.arrow_attack_time_c > 0) or self.arrow_attack==8:
+            x = pygame.mouse.get_pos()[0] - self.rect.x
+            y = pygame.mouse.get_pos()[1] - self.rect.y
+            Arrows.Caboom(self.rect.x, self.rect.y, True, (x, y), self.arrow_attack_time_c, map)
+            self.arrow_attack_time_c = 0
 
         self.pop_x = dx
         # odswierzanie pozycji

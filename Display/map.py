@@ -21,6 +21,7 @@ class Map:
         self.blocks = []
         self.coins = []
         self.enemies = []
+        self.arrows = []
         MapParser.parseLvl("Levels/lvl1.txt", self)
         self.camera = Camera.Camera(self.player, self)
 
@@ -39,6 +40,9 @@ class Map:
     
         for en in self.enemies:
             en.update(self)
+
+        for arrow in self.arrows:
+            arrow.update(self)
         
         # zbieranie monet
         for coin in self.coins:

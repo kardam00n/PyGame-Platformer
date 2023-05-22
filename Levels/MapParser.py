@@ -8,9 +8,11 @@ from Display import Block, Coin
 def parseLvl(file, map):
     with open(file, 'r') as f:
         for line in f:
-            vars = line.split(" ");
-            x = (int(vars[0])-1)*50; y = map.DISPLAY_H-int(vars[1])*50; id = int(vars[2])
-            
+            vars = line.split(" ")
+            x = (int(vars[0])-1)*50
+            y = map.DISPLAY_H-int(vars[1])*50
+            id = int(vars[2])
+            #construktors = [block.grass, coin.coin...]
             match id:
                 case 0:
                     map.player = Player.Player(x, y)

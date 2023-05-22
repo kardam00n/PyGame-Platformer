@@ -3,7 +3,7 @@ import time
 import pygame
 
 from Entities import HealthBar
-
+from Display import Arrows
 class Enemy():
     def __init__(self, x, y):
         self.img = pygame.image.load('assets/NightBorne.png').convert_alpha()
@@ -36,7 +36,6 @@ class Enemy():
         if dt > 500 or self.iFrameTime == 0:
             self.iFrameTime = time.time() * 1000
             self.health -= dmg
-        
     
     def update(self, map):
         blocks = map.blocks
@@ -88,6 +87,9 @@ class Enemy():
         if self.left:
             self.image = pygame.transform.flip(self.step_ani[self.step], True, False)
         else: self.image = self.step_ani[self.step]
+        # strzelanie
+        # if random.random()<0.05:
+        #
 
         self.rect.x = max(map.LEFT_BORDER, self.rect.x)
         self.rect.x = min(self.rect.x, map.RIGHT_BORDER - self.rect.width)
