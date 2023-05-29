@@ -100,7 +100,7 @@ class EnemyArcher(Enemy):
     def __init__(self, x, y):
         step_ani = []
         for i in range(1, 7):
-            path = 'assets/Archer/run/Archer_run' + str(i) + '.png'
+            path = 'assets/Archer/Run/Archer_run' + str(i) + '.png'
             img = pygame.image.load(path).convert_alpha()
             image = pygame.transform.scale(img, (80, 80))
             step_ani.append(image)

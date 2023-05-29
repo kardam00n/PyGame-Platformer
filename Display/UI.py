@@ -26,6 +26,14 @@ def displayUI(win, map):
     pygame.draw.rect(win, (255,0,0), (10,10,map.player.health,25))
     win.blit(health, healthRect)
 
+    #wysiwietlacz strzal
+    arrows = pygame.image.load(map.player.ARROWS[map.player.selectedArrows].getDisplayImg())
+    arrows = pygame.transform.scale(arrows, (50,50))
+    arrowsRect = arrows.get_rect()
+    arrowsRect.y = arrowsRect.y + 40
+    arrowsRect.x = arrowsRect.x + 10
+    win.blit(arrows,arrowsRect)
+
 def displayGameOver(win, map):
     font = pygame.font.Font('freesansbold.ttf', 24)
     gameOverStr = font.render("GAME OVER", True, (255, 0, 0), None)

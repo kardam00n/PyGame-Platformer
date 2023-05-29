@@ -59,6 +59,9 @@ class Classic(Arrow):
                     map.arrows.remove(self)
                     alive = False
             map.win.blit(self.image, (self.rect.x - map.camera.offset.x, self.rect.y - map.camera.offset.y))
+
+    def getDisplayImg():
+        return 'assets/arrowDisplay1.png'
 class Penetrating(Arrow):
     def __init__(self, x, y, friendly, pos, time, map):
         img = pygame.image.load('assets/arrows1.png').convert_alpha()
@@ -89,6 +92,8 @@ class Penetrating(Arrow):
                 map.player.health-=self.attack
                 map.arrows.remove(self)
         map.win.blit(self.image, (self.rect.x - map.camera.offset.x, self.rect.y - map.camera.offset.y))
+    def getDisplayImg():
+        return 'assets/arrowDisplay2.png'
 class Caboom(Arrow):
     def __init__(self, x, y, friendly, pos, time, map):
         img = pygame.image.load('assets/arrows1.png').convert_alpha()
@@ -122,3 +127,5 @@ class Caboom(Arrow):
                 alive=False
                 break
         map.win.blit(self.image, (self.rect.x - map.camera.offset.x, self.rect.y - map.camera.offset.y))
+    def getDisplayImg():
+        return 'assets/arrowDisplay3.png'
