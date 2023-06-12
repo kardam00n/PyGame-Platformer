@@ -1,7 +1,9 @@
 import pygame
 
+from enum import Enum
 from Entities import enemy, Player
 from Display import Block, Camera, Coin, map, UI
+from Display.UI import GameState
 
 
 if __name__ == '__main__':
@@ -11,45 +13,37 @@ if __name__ == '__main__':
     #rozmiary mapy wysokosc 600 szerokosc 2400, kamera 600 x 800
     #w blokach: 12x48 (dla kamery 12x16)
     win = pygame.display.set_mode((800, 600))
-    pygame.display.set_caption("Pierwsza gra")
+    pygame.display.set_caption("Platformers")
 
     run = True
-    gameOver = False
-    completed = False
     map = map.Map(win)
-
-
-
-    # lista zawierajaca bloki
-
+    currentState = GameState.MAINMENU
+    ui = UI.UI(win, map)
 
     while run:
         map.drawBG()
 
         # zamkniecie gry
-        if map.player.health<=0 and not completed:
-            gameOver = True
-        if map.player.completed and not gameOver:
-            completed = True
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-                gameOver = False
 
         # opóźnienie w grze
         pygame.time.delay(15)
 
+        currentState = ui.currentState
         # dodawanie obiektow do mapy
-        map.render()
-
-
-        UI.displayUI(win, map)
-
-        while gameOver:
-            UI.displayGameOver(win, map)
-            break
-        while completed:
-            UI.displayWin(win, map)
-            break
+        if currentState == GameState.FINISHED:
+            ui.displayWin()
+        if currentState == GameState.GAMEOVER:
+            ui.displayGameOver()
+        if currentState == GameState.RUNNING:
+            map.render()
+            ui.displayUI()
+        if currentState == GameState.CREDITS:
+            ui.displayCredits()
+        if currentState == GameState.MAINMENU:
+            ui.displayMainMenu()
+            
         # odświeżenie ekranu
         pygame.display.update()

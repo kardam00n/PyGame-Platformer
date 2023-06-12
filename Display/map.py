@@ -55,3 +55,13 @@ class Map:
         background = pygame.image.load("assets/Background.png")
         background = pygame.transform.scale(background, (800, 600))
         self.win.blit(background, (0, 0))
+
+    def resetLevel(self):
+        self.player = Player.Player(0,0)
+        self.finish = Block.Finish(self.DISPLAY_W, 0)
+        self.blocks = []
+        self.coins = []
+        self.enemies = []
+        self.arrows = []
+        MapParser.parseLvl("Levels/lvl1.txt", self)
+        self.camera = Camera.Camera(self.player, self)
