@@ -1,9 +1,8 @@
 import pygame
 
-from enum import Enum
+from Display.UI import GameState
 from Entities import enemy, Player
 from Display import Block, Camera, Coin, map, UI
-from Display.UI import GameState
 
 
 if __name__ == '__main__':
@@ -44,6 +43,6 @@ if __name__ == '__main__':
             ui.displayCredits()
         if currentState == GameState.MAINMENU:
             ui.displayMainMenu()
-            
+
         # odświeżenie ekranu
         pygame.display.update()

@@ -4,12 +4,7 @@ import time
 from Display import Block, Coin, Arrows
 
 class Player():
-    def __init__(self, x, y):
-        self.v_y = 0
-        self.v_x = 0
-        self.completed = False
-        self.img = pygame.image.load('assets/Adventurer Sprite Sheet v1.5.png').convert_alpha()
-        # wczytywanie animacji
+    def loadani(self):
         self.step_ani = []
         for i in range(8):
             self.step_ani.append(self.getimg(i, 1,32, 32))
@@ -27,7 +22,12 @@ class Player():
         for i in range(3):
             self.arrow_ani.append(self.getimg(i, 9, 32, 32))
         self.arrow_ani.append(self.getimg(6,9,32,32))
-        #
+    def __init__(self, x, y):
+        self.v_y = 0
+        self.v_x = 0
+        self.completed = False
+        self.img = pygame.image.load('assets/Adventurer Sprite Sheet v1.5.png').convert_alpha()
+        self.loadani()
         self.rect = self.image.get_rect()
         self.rect.x=x
         self.rect.y=y
@@ -40,7 +40,7 @@ class Player():
         self.mlee_time = 0
         self.mlee_attack = False
         self.left_side=False
-        self.attack = 10
+        self.attack = 100
         self.maxHealth = 200
         self.health=self.maxHealth
         self.iFrameTime = 0
@@ -57,22 +57,78 @@ class Player():
 
         image = pygame.transform.scale(image, (50, 50))
         return image
+    def colidate_with_blocks(self, blocks, finish, dx, dy, map):
+        self.in_air = True
+        touch_x = False
+        touch_y = False
+        # finish
+        if finish.rect.colliderect(self.rect.x + dx, self.rect.y, self.rect.width, self.rect.height):
+            self.completed = True
+        for block in blocks:
+            if block.rect.colliderect(self.rect.x + dx, self.rect.y, self.rect.width, self.rect.height):
+                dx = 0
+                touch_x = True
+            if block.rect.colliderect(self.rect.x + dx - 15 * (self.left_side), self.rect.y,
+                                      self.rect.width + 15 * (not self.left_side), self.rect.height):
+                if (self.mlee_attack and block.breakBlock()):
+                    map.blocks.remove(block)
+            if block.rect.colliderect(self.rect.x, self.rect.y + dy, self.rect.width, self.rect.height):
+                if self.v_y < 0:
+                    dy = block.rect.bottom - self.rect.top
+                    self.v_y = 0
+                else:
+                    dy = block.rect.top - self.rect.bottom
+                    if not touch_x:
+                        dx = block.slow(dx, self.pop_x)
+                    self.health -= block.hit()
+                    self.v_y = 0
+                    if not touch_y:
+                        if (self.jump):
+                            self.v_y -= 2 * block.bounce()
+                        else:
+                            self.v_y -= block.bounce()
+                    self.in_air = False
+        return dx, dy
+    def assault(self):
+        if self.mlee_time>=0:
+            self.image = self.mlee_ani[self.mlee_time]
+            if self.left_side:
+                self.image = pygame.transform.flip(self.mlee_ani[self.mlee_time], True, False)
+            self.mlee_time+=1
+            if self.mlee_time == 8:
+                self.mlee_time=-1
+                self.mlee_attack=False
+    def shoot(self, key, map):
+        if key[pygame.K_f] and self.arrow_attack_time<8:
+            if self.left_side:
+                self.image = pygame.transform.flip(self.arrow_ani[self.arrow_attack_time // 2], True, False)
+            else: self.image = self.arrow_ani[self.arrow_attack_time // 2]
+            self.arrow_attack_time+=1
 
-    def update(self, map):
-        blocks = map.blocks
-        enemies = map.enemies
-        finish = map.finish
-        # movement
-        dx=0
-        dy=0
-        key=pygame.key.get_pressed()
-        # idle animation
-        self.stand += 1
-        if self.stand > 12:
-            self.stand = 0
-        self.image = self.stand_ani[self.stand]
-
-
+        if (not key[pygame.K_f] and self.arrow_attack_time > 0) or self.arrow_attack==8:
+            x = pygame.mouse.get_pos()[0] - self.rect.x
+            y = pygame.mouse.get_pos()[1] - self.rect.y
+            self.ARROWS[self.selectedArrows](self.rect.x, self.rect.y, True, (x, y), self.arrow_attack_time, map)
+            self.arrow_attack_time = 0
+    def interaction_with_enemy(self, enemies, dx, dy, map):
+        dt = time.time() * 1000 - self.iFrameTime
+        for en in enemies:
+            if en.rect.colliderect(self.rect.x + dx, self.rect.y + dy, self.rect.width, self.rect.height):
+                if self.mlee_attack:
+                    if (self.left_side and self.rect.x > en.rect.x) or (not self.left_side and self.rect.x < en.rect.x):
+                        en.takeDmg(self.attack)
+                        if en.health <= 0:
+                            enemies.remove(en)
+                        self.points += 10
+                        continue
+                elif dt > 1000 or self.iFrameTime == 0:
+                    dy -= 10
+                    self.iFrameTime = time.time() * 1000
+                    self.health -= en.attack
+        if self.rect.y > map.DISPLAY_H:
+            self.health -= 10
+    def key_press(self, dx):
+        key = pygame.key.get_pressed()
         if key[pygame.K_SPACE] and not self.jump and not self.in_air:
             self.jump=True
             self.v_y=-25
@@ -103,43 +159,8 @@ class Player():
             if key[pygame.K_c]:
                 self.arrowICD = 0
                 self.selectedArrows = (self.selectedArrows-1)%3
-
-        # if key[]
-        # grawitacja
-        if self.v_y<=20:
-            self.v_y+=2
-        dy+=self.v_y
-
-        # interakcja z blokami
-        self.in_air=True
-        touch_x = False
-        touch_y = False
-        #dotarcie do mety
-        if finish.rect.colliderect(self.rect.x + dx, self.rect.y, self.rect.width, self.rect.height):
-            self.completed = True
-        for block in blocks:
-            if block.rect.colliderect(self.rect.x + dx, self.rect.y, self.rect.width, self.rect.height):
-                dx=0
-                touch_x = True
-            if block.rect.colliderect(self.rect.x + dx - 15*(self.left_side), self.rect.y, self.rect.width+15*(not self.left_side), self.rect.height):
-                    if(self.mlee_attack and block.breakBlock()):
-                        map.blocks.remove(block)
-            if block.rect.colliderect(self.rect.x, self.rect.y + dy, self.rect.width, self.rect.height):
-                if self.v_y<0:
-                    dy = block.rect.bottom - self.rect.top
-                    self.v_y=0
-                else:
-                    dy = block.rect.top - self.rect.bottom
-                    if not touch_x:
-                        dx = block.slow(dx, self.pop_x)
-                    self.health-=block.hit()
-                    self.v_y = 0
-                    if not touch_y:
-                        if (self.jump):
-                            self.v_y-=2*block.bounce()
-                        else:
-                            self.v_y-=block.bounce()
-                    self.in_air=False
+        return key, dx
+    def fly(self):
         if self.in_air:
             if self.air_time < 4:
                 self.air_time+=1
@@ -149,56 +170,47 @@ class Player():
                 self.image = self.jump_ani[self.air_time]
         else:
             self.air_time = 0
-        # atak
-        if self.mlee_time>=0:
-            self.image = self.mlee_ani[self.mlee_time]
-            if self.left_side:
-                self.image = pygame.transform.flip(self.mlee_ani[self.mlee_time], True, False)
-            self.mlee_time+=1
-            if self.mlee_time == 8:
-                self.mlee_time=-1
-                self.mlee_attack=False
-        # interakcja z wrogami
-        dt = time.time()*1000 - self.iFrameTime
-        for en in enemies:
-            if en.rect.colliderect(self.rect.x + dx, self.rect.y+dy, self.rect.width, self.rect.height):
-                if self.mlee_attack:
-                    if (self.left_side and self.rect.x>en.rect.x) or (not self.left_side and self.rect.x<en.rect.x):
-                        en.takeDmg(self.attack)
-                        # en.rect.x += 10 * (-1 if self.left_side else 1)
-                        if en.health <= 0:
-                            enemies.remove(en)
-                        self.points+=10
-                        continue
-                elif dt > 1000 or self.iFrameTime == 0:
-                    dy-=10
-                    self.iFrameTime = time.time() * 1000
-                    self.health-=en.attack
-                    # self.rect.x += 10 * (-1 if en.left else 1) 
+    def update(self, map):
+        blocks = map.blocks
+        enemies = map.enemies
+        finish = map.finish
+        # movement
+        dx=0
+        dy=0
 
-        if self. rect.y > map.DISPLAY_H:
-            self.health -= 10
+        # idle animation
+        self.stand += 1
+        if self.stand > 12:
+            self.stand = 0
+        self.image = self.stand_ani[self.stand]
 
-        # strzały klasyczna
-        if key[pygame.K_f] and self.arrow_attack_time<8:
-            if self.left_side:
-                self.image = pygame.transform.flip(self.arrow_ani[self.arrow_attack_time // 2], True, False)
-            else: self.image = self.arrow_ani[self.arrow_attack_time // 2]
-            self.arrow_attack_time+=1
+        # control
+        key, dx = self.key_press(dx)
 
-        if (not key[pygame.K_f] and self.arrow_attack_time > 0) or self.arrow_attack==8:
-            x = pygame.mouse.get_pos()[0] - self.rect.x
-            y = pygame.mouse.get_pos()[1] - self.rect.y
-            self.ARROWS[self.selectedArrows](self.rect.x, self.rect.y, True, (x, y), self.arrow_attack_time, map)
-            self.arrow_attack_time = 0
+        # gravity
+        if self.v_y<=20:
+            self.v_y+=2
+        dy+=self.v_y
 
-       
+        # colliding with blocks
+        dx, dy = self.colidate_with_blocks(blocks, finish, dx, dy, map)
+
+        # player fly
+        self.fly()
+
+        # assault
+        self.assault()
+
+        # interaction with enemies
+        self.interaction_with_enemy(enemies, dx, dy, map)
+
+        # arrows
+        self.shoot(key, map)
+
+        # refresh position
         self.pop_x = dx
-        # odswierzanie pozycji
         self.rect.x += dx
         self.rect.y += dy
-        # self.rect.x = max(map.LEFT_BORDER, self.rect.x)
-        # self.rect.x = min(self.rect.x, map.RIGHT_BORDER - self.rect.width)
     
-    def get_Coin(self, coin: Coin.Coin):
+    def get_coin(self, coin: Coin.Coin):
         self.points+=coin.points

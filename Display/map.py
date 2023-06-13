@@ -47,7 +47,7 @@ class Map:
         # zbieranie monet
         for coin in self.coins:
             if self.player.rect.colliderect(coin.rect):
-                self.player.get_Coin(coin)
+                self.player.get_coin(coin)
                 self.coins.remove(coin)
 
 
